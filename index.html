@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>풍수해 대응 상황실 · 13개 협업기능 자원배분 훈련</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0a0a0c;--panel:#161619;--panel2:#1c1c20;--line:#2e2e34;--line2:#3d3d44;
+    --ink:#fafafa;--dim:#b4b4be;--teal:#2dd4bf;--teal-d:#0d9488;--amber:#fbbf24;
+    --red:#fb7185;--green:#4ade80;--blue:#60a5fa;
+    --water1:#3b82c4;--water2:#2563a8;--water-deep:#15407a;--dry:#26262b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Pretendard',-apple-system,sans-serif;
+    background:
+      radial-gradient(1400px 700px at 15% -15%,#1e293b40,transparent),
+      radial-gradient(1000px 600px at 105% 0%,#0d948818,transparent),var(--bg);
+    color:var(--ink);min-height:100vh}
+  .wrap{max-width:1280px;margin:0 auto;padding:22px 22px 50px}
+
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--teal),var(--teal-d));
+    display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 24px #0f7d7266}
+  .brand h1{font-family:'Pretendard',sans-serif;font-weight:800;font-size:26px;letter-spacing:.5px}
+  .brand p{color:var(--dim);font-size:12px;margin-top:3px;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px}
+  .statusbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .modepill{font-size:11px;font-family:'IBM Plex Mono',monospace;padding:7px 12px;border-radius:30px;
+    border:1px solid var(--line);background:#161619;color:var(--dim)}
+  .modepill b{color:var(--amber)}
+  .alert{display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:13px;
+    padding:8px 14px;border-radius:30px;border:1px solid var(--line);background:#161619}
+  .alert .dot{width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:pulse 1.4s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .turn{text-align:right}.turn .t{font-family:'Pretendard',sans-serif;font-weight:800;font-size:24px}
+  .turn .p{color:var(--dim);font-size:12px;font-family:'IBM Plex Mono',monospace}
+
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+  @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:13px 16px}
+  .kpi .lab{font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase}
+  .kpi .val{font-family:'Pretendard',sans-serif;font-weight:800;font-size:24px;margin-top:3px;line-height:1}
+  .kpi .bar{height:5px;border-radius:4px;background:#0a1424;margin-top:9px;overflow:hidden}
+  .kpi .bar i{display:block;height:100%;width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+
+  .main{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+  @media(max-width:980px){.main{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:18px;padding:20px;box-shadow:0 8px 30px #00000055}
+  .card h2{font-family:'Pretendard',sans-serif;font-weight:800;font-size:17px;margin-bottom:14px;display:flex;align-items:center;gap:9px;justify-content:space-between}
+  .card h2 .tag{font-size:10px;font-family:'IBM Plex Mono',monospace;background:#0b2230;color:var(--teal);padding:4px 9px;border-radius:7px;border:1px solid var(--teal-d);letter-spacing:.5px}
+
+  .legend{display:flex;gap:14px;font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin-bottom:12px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .citymap{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;background:#0a1422;border:1px solid var(--line);border-radius:12px;padding:8px;aspect-ratio:10/7}
+  .cell{border-radius:3px;background:var(--dry);transition:background .7s ease}
+  .cell.river{background:#1f3a5c}
+  .cell.w1{background:var(--water1)}.cell.w2{background:var(--water2)}.cell.w3{background:var(--water-deep)}
+  .floodmeta{display:flex;justify-content:space-between;margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim)}
+  .floodmeta b{color:var(--blue)}
+
+  .sit{margin-top:16px;background:#161619;border:1px solid var(--line);border-left:4px solid var(--red);border-radius:12px;padding:15px}
+  .sit .phase{font-family:'Pretendard',sans-serif;font-weight:800;font-size:15px;color:var(--amber);margin-bottom:7px}
+  .sit .txt{font-size:14px;line-height:1.7;color:#e4e4e7}
+  .carry{margin-top:10px;font-size:12.5px;color:var(--red);font-family:'IBM Plex Mono',monospace;line-height:1.5}
+  .carry.ok{color:var(--green)}
+
+  .guide{font-size:13px;color:#d4d4d8;line-height:1.6;margin-bottom:14px;background:#1f314c;border:1px solid var(--line2);border-radius:10px;padding:12px 14px}
+  .guide b{color:var(--amber)}
+  .funcs{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  @media(max-width:560px){.funcs{grid-template-columns:1fr}}
+  .func{background:#26262b;border:1px solid var(--line2);border-radius:12px;padding:11px 13px;cursor:pointer;transition:.16s;position:relative;display:flex;align-items:center;gap:10px}
+  .func:hover{transform:translateY(-2px);border-color:var(--teal);background:#303036}
+  .func.match.showhint{border-color:var(--amber);background:#2b2b30;box-shadow:inset 0 0 0 1px #ffc14955}
+  .func.match.showhint::before{content:'권장';position:absolute;top:-8px;right:10px;font-size:10px;font-family:'IBM Plex Mono',monospace;background:var(--amber);color:#1a1206;padding:2px 8px;border-radius:20px;font-weight:700;letter-spacing:.5px}
+  .func.sel,.func.match.showhint.sel{border-color:var(--teal);background:linear-gradient(135deg,#3fe6cf,#16b3a0);
+    box-shadow:0 0 0 2px var(--teal),0 10px 26px #0f948877;transform:translateY(-2px)}
+  .func.match.showhint.sel::before{background:#063b34;color:#3fe6cf}
+  .func.sel .nm,.func.sel .ic{color:#052621}
+  .func.sel .no{color:#063b34}
+  .func.sel .pip{background:#0f948855}
+  .func.sel .pip.on{background:#04302a}
+  .func.sel::after{content:'✓';position:absolute;top:50%;right:13px;transform:translateY(-50%);font-size:18px;
+    font-weight:900;color:#052621}
+  .func.spent{opacity:.32;pointer-events:none}
+  .func .ic{font-size:20px;flex-shrink:0}
+  .func .mid{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+  .func .nm{font-size:14px;font-weight:700;line-height:1.2;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.3px}
+  .func .resrow{display:flex;align-items:center;gap:3px}
+  .func .pip{width:14px;height:5px;border-radius:2px;background:#3d3d44}
+  .func .pip.on{background:var(--teal)}
+  .func .no{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--teal);font-weight:600;flex-shrink:0;align-self:flex-start}
+  .func .rt{display:none}
+
+  .selinfo{font-size:12px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin:14px 0 10px;min-height:16px}
+  .selinfo b{color:var(--teal)}
+  .controls{display:flex;gap:10px;flex-wrap:wrap}
+  button{font-family:'Gowun Dodum',sans-serif;border:none;border-radius:12px;padding:14px 20px;font-size:15px;cursor:pointer;font-weight:700;transition:.15s}
+  .btn-go{background:linear-gradient(90deg,#ff7a45,#f5333f);color:#fff;flex:1;font-size:16px;box-shadow:0 6px 20px #f5333f55}
+  .btn-go:hover{filter:brightness(1.12)}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--dim)}
+  .btn-ghost:hover{border-color:var(--dim)}
+
+  .log{margin-top:18px;max-height:160px;overflow:auto}
+  .logitem{background:#161619;border-left:3px solid var(--line);padding:10px 13px;border-radius:9px;margin-bottom:8px;font-size:13px;line-height:1.55;animation:slide .3s}
+  .logitem.good{border-color:var(--green)}.logitem.bad{border-color:var(--red)}.logitem.warn{border-color:var(--amber)}
+  .logitem .sc{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);display:block;margin-top:3px}
+  @keyframes slide{from{opacity:0;transform:translateX(-8px)}to{opacity:1}}
+
+  .overlay{position:fixed;inset:0;z-index:60;background:#04080feb;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(5px);overflow:auto}
+  .modal{max-width:660px;width:100%;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:22px;padding:34px;margin:auto}
+  .modal h2{font-family:'Pretendard',sans-serif;font-weight:800;font-size:27px;margin-bottom:12px}
+  .modal p{color:#dcdce0;line-height:1.75;font-size:14px;margin-bottom:11px}
+  .modal ul{margin:10px 0 18px 18px;color:#d4d4d8;font-size:14px;line-height:1.85}
+  .modal ul b{color:var(--teal)}
+  .grade{font-family:'Pretendard',sans-serif;font-weight:800;font-size:72px;text-align:center;margin:6px 0;line-height:1}
+  .scoreline{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:9px 2px;font-size:14px}
+  .scoreline span:last-child{font-family:'IBM Plex Mono',monospace;color:var(--ink)}
+  .hidden{display:none!important}
+
+  /* landing menu */
+  .menu{display:flex;flex-direction:column;gap:11px;margin:16px 0}
+  .menuopt{display:flex;align-items:center;gap:14px;background:#222226;border:1px solid var(--line2);
+    border-radius:14px;padding:16px 18px;cursor:pointer;transition:.15s}
+  .menuopt:hover{transform:translateY(-2px);border-color:var(--teal);background:#26262b}
+  .menuopt.go{border-color:var(--teal-d);background:#13322e}
+  .menuopt.go:hover{background:#164038}
+  .menuopt .mi{font-size:30px;flex-shrink:0}
+  .menuopt h3{font-family:'Pretendard',sans-serif;font-weight:800;font-size:17px;margin-bottom:3px}
+  .menuopt p{font-size:12.5px;color:var(--dim);margin:0;line-height:1.45}
+  .back{background:transparent;border:1px solid var(--line2);color:var(--dim);font-size:13px;
+    padding:7px 14px;border-radius:20px;margin-bottom:14px;font-weight:600}
+  .back:hover{border-color:var(--teal);color:var(--teal)}
+
+  /* manual */
+  .msec{background:#1c1c20;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .msec h4{font-family:'Pretendard',sans-serif;font-weight:800;font-size:14.5px;color:var(--teal);margin-bottom:6px}
+  .msec p{font-size:13px;color:#d4d4d8;line-height:1.65;margin:0}
+
+  /* codex list */
+  .codexlist{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+  @media(max-width:520px){.codexlist{grid-template-columns:1fr}}
+  .cxitem{display:flex;align-items:center;gap:10px;background:#222226;border:1px solid var(--line2);
+    border-radius:11px;padding:11px 13px;cursor:pointer;transition:.15s}
+  .cxitem:hover{transform:translateY(-2px);border-color:var(--teal);background:#26262b}
+  .cxitem .cxic{font-size:20px;flex-shrink:0}
+  .cxitem .cxnm{font-size:13.5px;font-weight:700;line-height:1.2}
+  .cxitem .cxno{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal)}
+
+  /* codex detail */
+  #codexBody h2{display:flex;align-items:center;gap:10px}
+  .cxmeta{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+  .cxrow{background:#1c1c20;border:1px solid var(--line);border-radius:11px;padding:11px 14px}
+  .cxrow .k{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);letter-spacing:.5px;margin-bottom:4px}
+  .cxrow .v{font-size:13.5px;color:#ededf0;line-height:1.5}
+  .cxblock{margin-top:16px}
+  .cxblock h4{font-family:'Pretendard',sans-serif;font-weight:800;font-size:14.5px;margin-bottom:8px;color:var(--amber)}
+  .cxblock ul{margin:0 0 0 4px;list-style:none}
+  .cxblock li{font-size:13px;color:#d4d4d8;line-height:1.6;padding-left:18px;position:relative;margin-bottom:5px}
+  .cxblock li::before{content:'▸';position:absolute;left:0;color:var(--teal)}
+  .stagewrap{display:flex;flex-direction:column;gap:8px}
+  .stageitem{background:#1c1c20;border-left:3px solid var(--blue);border-radius:9px;padding:10px 13px}
+  .stageitem .sl{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--blue);margin-bottom:4px;font-weight:600}
+  .stageitem .sv{font-size:12.5px;color:#d4d4d8;line-height:1.55}
+
+  /* in-card info button */
+  .func .info{position:absolute;top:50%;right:11px;transform:translateY(-50%);width:24px;height:24px;
+    border-radius:50%;background:#33486a;color:#d4d4d8;font-size:13px;font-weight:700;display:flex;
+    align-items:center;justify-content:center;border:1px solid var(--line2);z-index:3;font-family:'IBM Plex Mono',monospace}
+  .func .info:hover{background:var(--teal);color:#052621}
+  .func.sel .info{background:#063b34;color:#3fe6cf;border-color:#063b34;right:42px}
+  .func .no{margin-right:30px}
+  .func.sel .no{margin-right:0}
+
+  /* mode select buttons */
+  .modesel{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:6px 0 16px}
+  @media(max-width:520px){.modesel{grid-template-columns:1fr}}
+  .modeopt{background:#161619;border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.15s}
+  .modeopt:hover{border-color:var(--teal-d);transform:translateY(-2px)}
+  .modeopt h3{font-family:'Pretendard',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px}
+  .modeopt.exp h3{color:var(--blue)} .modeopt.tr h3{color:var(--amber)}
+  .modeopt p{font-size:12.5px;color:var(--dim);line-height:1.55;margin:0}
+
+  /* debrief panel */
+  .debrief{margin-top:18px}
+  .debrief h3{font-family:'Pretendard',sans-serif;font-weight:800;font-size:16px;margin-bottom:10px}
+  .drow{background:#161619;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:9px}
+  .drow .dh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px}
+  .drow .dph{font-weight:600;font-size:13.5px}
+  .drow .dbadge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;border-radius:20px}
+  .dbadge.g{background:#0e3024;color:var(--green);border:1px solid #1c6b4d}
+  .dbadge.w{background:#352a0e;color:var(--amber);border:1px solid #7a5f1c}
+  .dbadge.b{background:#3a1620;color:var(--red);border:1px solid #7c2c3c}
+  .drow .dans{font-size:12px;color:var(--teal);font-family:'IBM Plex Mono',monospace;margin-bottom:5px}
+  .drow .dexp{font-size:12.5px;color:#cacace;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">🌀</div>
+      <div><h1>풍수해 대응 상황실</h1><p>13개 협업기능 자원배분 훈련 · DREX TRAINING</p></div>
+    </div>
+    <div class="statusbar">
+      <div class="modepill" id="modePill">모드 <b>—</b></div>
+      <div class="alert"><span class="dot" id="alertDot"></span><span id="alertTxt">상황 대기</span></div>
+      <div class="turn"><div class="t" id="turnT">T0 / 7</div><div class="p" id="turnP">대기 중</div></div>
+    </div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="lab">인명피해 위험</div><div class="val" id="kCas">0</div><div class="bar"><i id="bCas" style="background:var(--red)"></i></div></div>
+    <div class="kpi"><div class="lab">침수면적 ha</div><div class="val" id="kFlood">0</div><div class="bar"><i id="bFlood" style="background:var(--water2)"></i></div></div>
+    <div class="kpi"><div class="lab">이재민 명</div><div class="val" id="kRef">0</div><div class="bar"><i id="bRef" style="background:var(--amber)"></i></div></div>
+    <div class="kpi"><div class="lab">피해액 억</div><div class="val" id="kDmg">0</div><div class="bar"><i id="bDmg" style="background:#f08a3c"></i></div></div>
+    <div class="kpi"><div class="lab">협업적정성</div><div class="val" id="kScore">100</div><div class="bar"><i id="bScore" style="width:100%;background:var(--green)"></i></div></div>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <h2>🗺 피해 상황도 <span class="tag">REGION MAP</span></h2>
+      <div class="legend">
+        <span><i style="background:var(--dry)"></i>안전</span>
+        <span><i style="background:var(--water1)"></i>침수 우려</span>
+        <span><i style="background:var(--water2)"></i>침수</span>
+        <span><i style="background:var(--water-deep)"></i>심각 침수</span>
+        <span><i style="background:#1f3a5c"></i>하천</span>
+      </div>
+      <div class="citymap" id="cityMap"></div>
+      <div class="floodmeta"><span>침수 구역 <b id="floodCells">0</b> / 70</span><span>대응 효율 <b id="effLabel">—</b></span></div>
+      <div class="sit">
+        <div class="phase" id="sitPhase">상황 대기 중</div>
+        <div class="txt" id="sitTxt">「상황 개시」를 누르면 첫 보고가 도착합니다.</div>
+        <div class="carry" id="carryBox"></div>
+      </div>
+      <div class="log" id="logBox"></div>
+    </div>
+
+    <div class="card">
+      <h2>🛠 협업기능 자원 투입 <span class="tag">DEPLOY</span></h2>
+      <div class="guide" id="guideTxt"></div>
+      <div class="funcs" id="funcs"></div>
+      <div class="selinfo" id="selInfo">선택된 기능 없음</div>
+      <div class="controls">
+        <button class="btn-go" id="goBtn" onclick="resolveTurn()">자원 투입 · 다음 국면 ▶</button>
+        <button class="btn-ghost" onclick="skipTurn()">관망</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO / LANDING -->
+<div class="overlay" id="intro">
+  <div class="modal">
+    <!-- landing menu -->
+    <div id="landing">
+      <h2>🌀 풍수해 대응 상황실</h2>
+      <p>행안부 표준 <b>13개 협업기능</b> 체계 기반 재난대응 훈련 시뮬레이션입니다. 시·도 재난안전대책본부 <b>통제관</b>이 되어 태풍·호우 상황에 맞는 협업기능을 가동해 피해를 억제합니다.</p>
+      <div class="menu">
+        <div class="menuopt go" onclick="showSection('modes')">
+          <div class="mi">🎮</div><div><h3>게임 시작</h3><p>체험·훈련 모드 선택 후 7개 국면 대응 시작</p></div>
+        </div>
+        <div class="menuopt" onclick="showSection('manual')">
+          <div class="mi">📖</div><div><h3>사용 설명서</h3><p>게임 목표·진행 방법·점수 읽는 법·모드 차이</p></div>
+        </div>
+        <div class="menuopt" onclick="showSection('codex')">
+          <div class="mi">🗂</div><div><h3>13개 협업기능 도감</h3><p>각 기능의 주관·지원·협업기관과 임무·단계별 행동</p></div>
+        </div>
+      </div>
+      <p style="color:var(--dim);font-size:12px;margin-top:6px">자료 출처: 행안부 풍수해 현장조치 행동매뉴얼 · 재난안전대책본부 협업기능 체계</p>
+    </div>
+
+    <!-- mode select -->
+    <div id="modes" class="hidden">
+      <button class="back" onclick="showSection('landing')">‹ 메뉴</button>
+      <h2>모드 선택</h2>
+      <p style="color:var(--amber);font-size:13.5px">⚠ 한 국면에서 못 막은 피해는 다음 국면으로 누적·전이됩니다. 초반 대응이 후반을 좌우합니다.</p>
+      <div class="modesel">
+        <div class="modeopt exp" onclick="startGame('exp')">
+          <h3>🟦 체험 모드</h3>
+          <p>각 국면의 핵심 기능에 <b style="color:var(--amber)">권장</b> 배지가 표시됩니다. 처음 접하거나 일반 주민 체험용.</p>
+        </div>
+        <div class="modeopt tr" onclick="startGame('train')">
+          <h3>🟨 훈련 모드</h3>
+          <p>권장 배지 <b>없음</b>. 스스로 판단해 기능을 골라야 합니다. 종료 후 국면별 정답·해설 제공. 공무원 평가·훈련용.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- manual -->
+    <div id="manual" class="hidden">
+      <button class="back" onclick="showSection('landing')">‹ 메뉴</button>
+      <h2>📖 사용 설명서</h2>
+      <div class="msec"><h4>이 게임의 목표</h4><p>재난은 한 기관이 아니라 13개 협업기능이 동시에 맞물려 대응합니다. 상황마다 어느 기능이 핵심인지 판단하고, 한정된 자원을 적시·적소에 투입해 인명·재산 피해를 최소화하는 것이 목표입니다.</p></div>
+      <div class="msec"><h4>진행 방법</h4><p>① 좌측 <b>상황 보고</b>를 읽습니다 → ② 우측 <b>협업기능 카드</b>에서 이번 국면에 필요한 기능을 눌러 선택(청록색으로 채워짐) → ③ <b>「자원 투입·다음 국면」</b> 버튼을 누르면 결과가 반영되고 다음 국면으로 넘어갑니다. 7개 국면을 거쳐 종료됩니다.</p></div>
+      <div class="msec"><h4>자원과 ⓘ 도감</h4><p>각 기능에는 한정된 자원(파란 막대)이 있고, 투입하면 소모되며 매 국면 일부 회복됩니다. 카드의 <b>ⓘ</b>를 누르면 그 기능의 주관·협업기관과 임무를 게임 중에도 바로 확인할 수 있습니다.</p></div>
+      <div class="msec"><h4>지표 읽는 법</h4><p>상단 5개 지표 — 인명피해 위험·침수면적·이재민·피해액은 <b>낮을수록</b> 좋고, 협업적정성은 <b>높을수록</b> 좋습니다. 좌측 상황도에서 침수가 차오르는 것을 실시간으로 볼 수 있습니다.</p></div>
+      <div class="msec"><h4>두 모드 차이</h4><p><b>체험 모드</b>는 핵심 기능에 권장 배지가 떠 쉽게 따라할 수 있습니다. <b>훈련 모드</b>는 배지 없이 스스로 판단하고, 종료 후 국면별 정답·해설로 복기합니다.</p></div>
+    </div>
+
+    <!-- codex list -->
+    <div id="codex" class="hidden">
+      <button class="back" onclick="showSection('landing')">‹ 메뉴</button>
+      <h2>🗂 13개 협업기능 도감</h2>
+      <p style="color:var(--dim);font-size:12.5px">기능을 누르면 주관·지원·협업기관과 임무, 4단계별 행동을 볼 수 있습니다.</p>
+      <div class="codexlist" id="codexList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CODEX DETAIL (also used in-game via ⓘ) -->
+<div class="overlay hidden" id="codexDetail">
+  <div class="modal">
+    <button class="back" id="codexBack">‹ 닫기</button>
+    <div id="codexBody"></div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="overlay hidden" id="result">
+  <div class="modal">
+    <h2>📋 대응 결과 디브리핑</h2>
+    <div class="grade" id="gradeLetter">A</div>
+    <div id="resultLines"></div>
+    <p id="resultMsg" style="margin-top:14px"></p>
+    <div class="debrief" id="debriefBox"></div>
+    <div class="controls" style="margin-top:16px"><button class="btn-go" onclick="location.reload()">다시 훈련 ▶</button></div>
+  </div>
+</div>
+
+
+<script>
+const FUNCTIONS=[
+  {no:1,name:"상황관리총괄",res:5,key:"command",ic:"🧭",
+   main:"재난주관부서 (풍수해: 안전정책과)",support:"안전정책과·행정과",coop:"관할 소방서, 관할 경찰서",
+   mission:["일일상황보고서 작성 및 보고","재난현장 수습상황관리 총괄","대통령·국무총리·중대본부장·사고수습본부장 특별지시사항 처리","상황판단회의 보고회 자료 준비","재난발생현황, 구조인력·장비 투입현황 파악","인명 및 재산피해 상황 파악","재난상황 파악 및 전달·처리","재난안전대책본부 운영상황 관리","지역재난관리책임기관 등 관계기관 대처상황 파악","각종 여론·정보 수집, 민원 등 파악"],
+   stage:["위기징후 감시·접수·파악, 상황판단회의, (위기)예보, 위기경보 발령, 긴급대응 조치","재난상황 접수·전파·보고, 필요자원 파악 및 지원요청","재난상황 전파·보고(계속), 비상대책기구 편성·운영, 대책본부 회의, 현장통합지원본부 운영","재난 및 사고피해상황 조사 및 복구계획 수립, 복구상황 총괄"]},
+  {no:2,name:"긴급생활안정지원",res:4,key:"life",ic:"🏠",
+   main:"주민복지과",support:"가족행복과",coop:"대한적십자사 지구협의회",
+   mission:["재난지원금 및 생활안정지원 상황관리와 홍보·지급 독려","이재민 발생상황 파악·관리(수용·급식 등)","재해구호물자 확보·비축상황 관리 및 신속한 지원","피해주민 불편사항 해소 위한 긴급대책 및 생활안정 단기대책 지원","재난구호활동상황 및 구호물품 지원상황 파악","사망·실종자 유족 대책, 응급생계구호 실시"],
+   stage:["(필요시) 비상근무","이재민 관리","이재민 지역대피센터 설치, 임시주거시설 운영, 구호물자 배분, 생활도움서비스 및 심리·정서지원, 장례지원(사망자 현황파악·전담인력·합동분향소), 생활안정지원(민원접수창구·의연금 관리)","이재민 관리(계속), 임시주거시설 운영(변경), 장례지원 지속, 생활안정지원(재해구호 예산·지원금 투입, 피해보상 접수·지원)"]},
+  {no:3,name:"긴급통신지원",res:3,key:"comm",ic:"📡",
+   main:"행정과",support:"—",coop:"군부대",
+   mission:["통신시설 피해 및 긴급 복구상황 파악","통신기반시설 긴급복구 지원","통신 두절지역 이동통신시설 설치 등 긴급통신체계 구축","관할지역 재난현장 복구현황 파악","재난현장 긴급통신 송수신 체계 유지(재난안전통신망 포함)"],
+   stage:["(필요시) 비상근무","긴급통신 지원","긴급통신 지원(계속), 통신두절 지역 복구 요청","긴급통신 지원(계속), 통신두절 지역 복구 요청(계속)"]},
+  {no:4,name:"시설응급복구",res:5,key:"facility",ic:"🚧",
+   main:"시설물 소관부서",support:"—",coop:"군부대",
+   mission:["공공·사유시설 피해 및 응급복구 상황 파악","공공·사유시설 응급복구 위한 인력·장비·자재 등 지원","관할지역 재난현장 응급복구 현황 파악"],
+   stage:["(필요시) 비상근무","응급복구 장비 보유현황 파악 및 지원","응급복구반 편성 및 응급복구계획 수립, 응급복구 장비 보유현황 파악·지원(계속), 응급복구 추진사항 관리","장기 수습복구 방안 마련 및 재발방지대책 수립, 재난수습 주무부서에 보상·사후관리 요청"]},
+  {no:5,name:"에너지기능복구",res:3,key:"energy",ic:"⚡",
+   main:"경제과",support:"—",coop:"한전 지역지사, 가스안전공사",
+   mission:["군·민생활 밀착형 시설(가스·전기·유류 등) 피해상황 및 긴급복구 상황 파악","시설긴급복구 위한 인력·장비·자재 등 지원","가스·전기·유류 등 피해시설 기능회복 지원","관할지역 재난현장 복구현황 파악"],
+   stage:["(필요시) 비상근무","에너지 공급중단 상황 파악 및 복구, 재난현장 에너지 지원","에너지 공급중단 상황 파악 및 복구(계속), 에너지 기능 복구지원, 재난현장 에너지 차단","재난현장 에너지 지원(계속)"]},
+  {no:6,name:"재난자원지원",res:4,key:"logi",ic:"📦",
+   main:"안전정책과·자원보유부서",support:"재무과·행정과",coop:"자원보유기관 및 업체, 군부대",
+   mission:["재난관리자원 공동활용시스템(DRSS) 운영·가동","피해상황에 따른 민간자원 응원","장비·자재 부족지역 파악 및 지원활동 전개","타 지역 장비·자재를 부족지역에 활용하는 공동활용 행정지도","재난관리자원의 비축·응원 및 사용현황 파악·관리"],
+   stage:["(필요시) 비상근무","재난관리자원 확보 현황 파악, 재난현장 필요자원 수요 파악","재난관리자원 확보·수요 파악 및 지원(계속), 재난관리자원 동원 및 지원, 동원 자료 관리","재난현장 필요자원 수요·동원 지원(계속), 응급복구 수습 예산 지원"]},
+  {no:7,name:"교통대책",res:4,key:"traffic",ic:"🚦",
+   main:"건설교통과",support:"—",coop:"관할 경찰서",
+   mission:["재난발생지역 해상 및 항공 통제현황 파악","육상·해상·항공 통제상황 모니터링","교통두절구간(도로·해상·항공) 실태 파악 보고","연안여객선·유도선 운항 통제","해상 및 항공분야 긴급수송 지원","통행재개 및 소통대책 지원"],
+   stage:["(필요시) 비상근무","교통상황 관리, 교통대책반 가동, 교통상황 파악 및 통제대책 수립","교통상황 관리(계속), 교통대책 강구, 교통두절 지역 우회도로 마련, 대체교통수단·비상수송수단 가동","—"]},
+  {no:8,name:"의료및방역서비스",res:4,key:"medical",ic:"🚑",
+   main:"보건소",support:"—",coop:"관할 소방서",
+   mission:["재난발생지역 의료·방역 서비스 제공 현황 파악","재난발생지역 의료·방역 자원배분현황 파악 및 조정 지원","비상방역실시 현황 파악","부상자 의료지원 및 기동의료반 편성·운영 지도·확인","침수지역 및 이재민 집단급식소·위생관리 지도·확인","감염병 예방 방역소독 및 기동방역반 편성·운영"],
+   stage:["(필요시) 비상근무","의료방역분야 상황 총괄, 의료·방역지원(인력·물자 동원)","의료방역 총괄(계속), 현장응급의료소 운영(응급의료 인력편성·설치, 부상자 분류·응급처치, 사상자 조치·임시영안실), 환자 이송 및 관리, 방역/보건/위생활동","의료·방역지원(계속), 환자 이송·관리(계속), 방역 실시·위생보건활동(계속)"]},
+  {no:9,name:"재난현장환경정비",res:3,key:"env",ic:"🧪",
+   main:"환경과",support:"—",coop:"군부대",
+   mission:["육상·해상 환경오염물질(재난폐기물·위험물 등) 피해상황 및 처리실태·관리","환경오염물질 처리 위한 인력·장비·자재 등 지원","재난쓰레기 수거처리 및 임시 적환장(운동장·공원·폐기물처리시설 등) 설치·운영 지도·확인","관할지역 재난현장 복구현황 파악"],
+   stage:["(필요시) 비상근무","오염예방 및 환경관리, 사고지역 주변 환경관리","임시적환장 운영 및 폐기물 처리(지정·운영, 재난폐기물 수거·처리), 오염예방·환경관리(불법투기 감시, 사고지역 주변 환경관리)","임시적환장 운영·폐기물 처리(계속), 재난폐기물 처리비용 지원, 오염예방·환경관리(계속)"]},
+  {no:10,name:"자원봉사관리",res:3,key:"volunteer",ic:"🤝",
+   main:"행정과",support:"—",coop:"자원봉사센터",
+   mission:["자원봉사센터 설치·운영 및 지도·확인","자원봉사자 투입 현황 및 소요자원 확인","사유시설 응급복구 등 대민지원활동 추진","수해주택 안전점검 및 무상수리 등 추진"],
+   stage:["(필요시) 비상근무","통합자원봉사지원단 설치·운영 여부 결정","통합자원봉사지원단 설치·운영 요청 및 지원, 활동관리·지원, 자원봉사자 모집·투입","통합자원봉사지원단 활동관리·지원(계속), 자원봉사자 모집·투입(계속)"]},
+  {no:11,name:"사회질서유지",res:4,key:"police",ic:"🚓",
+   main:"행정과",support:"건설교통과·관할 경찰서, 재난수습 주무부서",coop:"관할 경찰서",
+   mission:["재난발생지역 육상교통통제 및 두절지역 파악","출입제한 및 차량운행통제 실시","지역주민 불편 최소화 위한 우회도로 홍보","주민대피, 범죄예방 사전조치","고립지역 긴급수송로 개설 및 수송차량 확보·지원","긴급차량 통행로 확보","재난지역 긴급차량 이동 최우선 지원"],
+   stage:["주민대피(주민대피 및 소개계획 수립·준비, 사전대피 권고), 통제 및 질서유지(재난현장 취약지역 출입통제)","주민대피(대피명령 발령, 안전취약계층 대피관리), 통제·질서유지(취약지역 출입통제, 교통통제·교통통제소 운영)","주민대피(대피명령 발령·계속), 통제·질서유지(출입통제·변경, 질서유지·범죄예방), 교통통제 및 교통통제소 운영(계속)","주민대피(대피명령 해제), 통제·질서유지(재난현장 질서유지·범죄예방점검·순찰), 교통통제·교통통제소 운영(계속)"]},
+  {no:12,name:"수색구조구급",res:5,key:"rescue",ic:"🛟",
+   main:"보건소",support:"재난수습 주무부서",coop:"관할 소방서, 군부대",
+   mission:["재난지역 인명 수색, 구조·구급 상황 파악 및 지원","사상자 응급조치 및 의료기관 후송·안치 지원","재난현장 특성·2차 피해 발생여부 정보 제공","현장 응급의료소 설치·운영 지원","군부대 등 수색·구조활동 업무협조 및 지원"],
+   stage:["—","수색구조구급 활동지원","수색구조구급 활동지원(계속), 긴급구조통제단 가동, 지역긴급구조통제단·현장지휘소 설치운영, 수색구조급상황·피해현황 정보공유","수색구조구급 활동지원(계속), 긴급구조 완료 시 현장지휘권 이양"]},
+  {no:13,name:"재난수습홍보",res:4,key:"order",ic:"📋",
+   main:"기획홍보과",support:"재난수습 주무부서",coop:"—",
+   mission:["재난상황별 국민행동요령 홍보","TV·라디오 등 매체 활용 재난 예보·경보 전파","재난 관련 보도자료 취합·배포","언론발표 준비·실시 및 언론사 인터뷰","취재지원센터 운영","방송·언론보도 모니터링","SNS·홈페이지 등 온라인 홍보·모니터링","오보·유언비어 확인·대응","중대본·사고수습본부·도·군 재난수습홍보반 협조·공유체계 구축"],
+   stage:["재난방송 및 홍보, 언론 모니터링·오보 대응, 보도자료 작성·배포","재난방송 및 홍보(변경), 언론 모니터링·오보 대응(계속), 보도자료 작성·배포(계속)","재난방송 및 홍보(계속), 언론 모니터링·오보 대응(계속), 현장통합언론취재지원센터 운영","재난방송 및 홍보(계속), 보도자료 작성·배포(계속), 현장통합언론취재지원센터 운영(계속)"]},
+];
+const FN=k=>FUNCTIONS.find(f=>f.key===k);
+const SCENARIO=[
+  {phase:"태풍 접근 (D-1)",sev:"주의",alert:"주의보",
+   text:"태풍 「하늬」 18시간 후 상륙 예상. 강풍·해일 특보 발효. 사전 대피·예찰 단계.",
+   need:["command","comm","traffic"],dmg:{flood:3,ref:0,cas:1,money:2},
+   exp:"대비 단계의 핵심은 컨트롤타워 가동(상황관리총괄), 경보 전파 수단 확보(통신), 대피로·통제 사전 확보(교통)입니다. 이 셋을 미리 깔아두면 이후 모든 국면의 대응 속도가 빨라집니다."},
+  {phase:"호우 집중 (D-0 새벽)",sev:"경계",alert:"경보",
+   text:"시간당 80mm 폭우. 저지대 도로 침수 시작, 하천 수위 급상승. 통신 일부 두절.",
+   need:["comm","facility","traffic"],dmg:{flood:12,ref:2,cas:2,money:6},
+   exp:"두절된 통신 복구로 신고·지령 체계를 유지하고, 배수·수방으로 시설 응급복구를 가동하며, 침수 도로를 통제(교통)해 2차 사고를 막는 국면입니다."},
+  {phase:"하천 범람",sev:"심각",alert:"심각",
+   text:"○○천 제방 월류·붕괴. 주거지 침수 확대, 고립 가구 다수. 119 구조 폭주.",
+   need:["rescue","facility","command"],dmg:{flood:25,ref:8,cas:6,money:18},
+   exp:"인명이 직접 위협받는 최대 고비입니다. 수색·구조·구급이 1순위, 제방·배수 응급복구로 추가 침수 차단, 폭주하는 자원을 총괄 조정(상황관리)해야 합니다. 여기서 통신·교통이 미리 안 깔려 있으면 구조가 지연됩니다."},
+  {phase:"이재민 발생·정전",sev:"심각",alert:"심각",
+   text:"이재민 급증, 변전설비 침수로 광역 정전. 대피소·식수·전력 복구 시급.",
+   need:["life","energy","volunteer"],dmg:{flood:18,ref:14,cas:4,money:14},
+   exp:"생존 국면입니다. 대피소·식수·구호품(생활안정지원), 전력 복구(에너지기능), 현장 인력 보강(자원봉사관리)이 맞물려야 이재민 2차 피해를 막습니다."},
+  {phase:"2차 위험·고립",sev:"위험",alert:"심각",
+   text:"산사태 우려지역 추가 대피령. 침수차량 다수, 도로 통제 혼선. 부상자 이송 지연.",
+   need:["rescue","medical","traffic"],dmg:{flood:10,ref:6,cas:8,money:10},
+   exp:"2차 재난 국면. 추가 고립자 수색·구조, 부상자 응급의료·이송, 도로 통제·우회로 확보(교통)가 동시에 필요합니다. 인명피해 위험이 가장 가파르게 오르는 구간입니다."},
+  {phase:"대응 정점·치안",sev:"위험",alert:"경보",
+   text:"빈집털이·대피소 혼란 신고. 오염수 유출·가축 부패로 감염병 우려. 질서·방제·방역이 관건.",
+   need:["police","env","medical"],dmg:{flood:6,ref:4,cas:3,money:8},
+   exp:"피해지역 사회질서유지(출입통제·범죄예방), 재난현장 환경정비(오염수·재난폐기물 처리), 의료·방역(가축 부패에 따른 감염병 방역)으로 사회적 2차 피해를 차단하는 국면입니다."},
+  {phase:"복구 전환",sev:"복구",alert:"주의보",
+   text:"강우 종료, 수위 하강. 응급복구·생활지원·피해조사로 전환. 빠른 일상 회복.",
+   need:["facility","life","logi"],dmg:{flood:4,ref:5,cas:1,money:12},
+   exp:"복구 국면. 도로·시설 응급복구, 이재민 생활지원 지속, 복구 자원·장비 배분(재난관리자원지원)으로 일상 회복 속도를 결정합니다. 침수가 빠지는 유일한 국면입니다."},
+];
+const TOTAL=SCENARIO.length;
+const CAP={cas:40,flood:120,ref:60,dmg:120};
+let turn=0,mode='exp',selected=new Set(),resAvail={},
+    state={cas:0,flood:0,ref:0,dmg:0,score:100},
+    record=[],unmetPrev=0;
+
+const RIVER=new Set([4,14,24,34,44,54,64]);
+const cells=[];
+function buildMap(){const m=document.getElementById('cityMap');m.innerHTML='';
+  for(let i=0;i<70;i++){const c=document.createElement('div');
+    c.className='cell'+(RIVER.has(i)?' river':'');m.appendChild(c);cells.push(c);}}
+buildMap();
+let floodOrder=[];
+(function(){const cols=10,dist=[];
+  for(let i=0;i<70;i++){if(RIVER.has(i)){dist.push({i,d:0});continue;}
+    let r=Math.floor(i/cols),cc=i%cols,best=99;
+    RIVER.forEach(j=>{let rr=Math.floor(j/cols),jc=j%cols;best=Math.min(best,Math.abs(rr-r)+Math.abs(jc-cc));});
+    dist.push({i,d:best+(i%3)*0.2});}
+  dist.sort((a,b)=>a.d-b.d);floodOrder=dist.map(x=>x.i);})();
+function renderFloodMap(){
+  const n=Math.round(Math.min(70,Math.max(0,state.flood/CAP.flood*70)));let flooded=0;
+  cells.forEach(c=>c.classList.remove('w1','w2','w3'));
+  for(let k=0;k<floodOrder.length;k++){if(k<n){flooded++;const depth=(n-k)/n;
+    cells[floodOrder[k]].classList.add(depth>0.6?'w3':depth>0.3?'w2':'w1');}}
+  document.getElementById('floodCells').textContent=flooded;
+}
+
+function showSection(id){
+  ['landing','modes','manual','codex'].forEach(s=>{
+    document.getElementById(s).classList.toggle('hidden', s!==id);
+  });
+  if(id==='codex')renderCodexList();
+}
+function renderCodexList(){
+  const w=document.getElementById('codexList');w.innerHTML='';
+  FUNCTIONS.forEach(f=>{
+    const d=document.createElement('div');d.className='cxitem';
+    d.innerHTML='<span class="cxic">'+f.ic+'</span><span class="cxnm">'+f.name+'</span><span class="cxno">#'+f.no+'</span>';
+    d.onclick=()=>openCodex(f.key,false);w.appendChild(d);
+  });
+}
+let codexFromGame=false;
+function openCodex(key,fromGame){
+  codexFromGame=fromGame;
+  const f=FN(key);
+  let mission='';f.mission.forEach(m=>mission+='<li>'+m+'</li>');
+  const stageLabels=['1단계 평시·초기대응','2단계 지대본 비상1단계','3단계 지대본 비상2·3단계','4단계 수습·복구'];
+  let stages='';f.stage.forEach((s,i)=>{stages+='<div class="stageitem"><div class="sl">'+stageLabels[i]+'</div><div class="sv">'+s+'</div></div>';});
+  document.getElementById('codexBody').innerHTML=
+    '<h2>'+f.ic+' '+f.no+'. '+f.name+'</h2>'+
+    '<div class="cxmeta">'+
+      '<div class="cxrow"><div class="k">주관부서</div><div class="v">'+f.main+'</div></div>'+
+      '<div class="cxrow"><div class="k">지원부서</div><div class="v">'+f.support+'</div></div>'+
+      '<div class="cxrow"><div class="k">협업기관</div><div class="v">'+f.coop+'</div></div>'+
+    '</div>'+
+    '<div class="cxblock"><h4>핵심 임무</h4><ul>'+mission+'</ul></div>'+
+    '<div class="cxblock"><h4>단계별 행동 (4단계 대응 프로세스)</h4><div class="stagewrap">'+stages+'</div></div>';
+  document.getElementById('codexBack').textContent = fromGame ? '‹ 게임으로' : '‹ 도감 목록';
+  document.getElementById('codexDetail').classList.remove('hidden');
+}
+document.getElementById('codexBack').onclick=()=>{
+  document.getElementById('codexDetail').classList.add('hidden');
+};
+
+function startGame(m){
+  mode=m;
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('modePill').innerHTML='모드 <b>'+(m==='exp'?'체험':'훈련')+'</b>';
+  document.getElementById('guideTxt').innerHTML = m==='exp'
+    ? '📌 <b>권장</b> 배지가 붙은 기능이 이번 국면의 핵심입니다. 카드를 눌러 선택하고 <b>투입</b> 버튼을 누르세요.'
+    : '🎯 권장 표시가 없습니다. 상황 보고를 읽고 <b>스스로</b> 핵심 기능을 판단해 투입하세요. 종료 후 국면별 정답·해설이 제공됩니다.';
+  FUNCTIONS.forEach(f=>resAvail[f.key]=f.res);
+  turn=0;unmetPrev=0;nextTurn();
+}
+function nextTurn(){
+  selected.clear();
+  if(turn>0)FUNCTIONS.forEach(f=>resAvail[f.key]=Math.min(f.res,resAvail[f.key]+1));
+  const sc=SCENARIO[turn];
+  document.getElementById('turnT').textContent='T'+(turn+1)+' / '+TOTAL;
+  document.getElementById('turnP').textContent=sc.phase;
+  document.getElementById('sitPhase').textContent='['+sc.sev+'] '+sc.phase;
+  document.getElementById('sitTxt').textContent=sc.text;
+  document.getElementById('alertTxt').textContent=sc.alert;
+  const dot=document.getElementById('alertDot');
+  const col=sc.sev==='복구'?'var(--green)':sc.sev==='주의'?'var(--amber)':'var(--red)';
+  dot.style.background=col;dot.style.boxShadow='0 0 10px '+col;
+  // carryover note
+  const cb=document.getElementById('carryBox');
+  if(turn===0){cb.textContent='';}
+  else if(unmetPrev>=2){cb.className='carry';cb.textContent='⚠ 직전 국면 미대응 누적 — 이번 피해 확산이 가중됩니다 (전이 +'+Math.round(unmetPrev*15)+'%).';}
+  else if(unmetPrev===1){cb.className='carry';cb.textContent='△ 직전 국면 일부 누락 — 약간의 피해가 이월되었습니다.';}
+  else{cb.className='carry ok';cb.textContent='✓ 직전 국면 안정적으로 통제됨 — 이번 국면 대응 여건 양호.';}
+  renderFuncs();updateKPIs();renderFloodMap();
+  document.getElementById('selInfo').textContent='선택된 기능 없음';
+}
+function renderFuncs(){
+  const sc=SCENARIO[turn];const wrap=document.getElementById('funcs');wrap.innerHTML='';
+  FUNCTIONS.forEach(f=>{
+    const d=document.createElement('div');d.className='func';
+    if(sc.need.includes(f.key))d.classList.add('match');
+    if(mode==='exp')d.classList.add('showhint');
+    if(resAvail[f.key]<=0)d.classList.add('spent');
+    if(selected.has(f.key))d.classList.add('sel');
+    let pips='';for(let i=0;i<f.res;i++)pips+='<span class="pip'+(i<resAvail[f.key]?' on':'')+'"></span>';
+    d.innerHTML='<span class="ic">'+f.ic+'</span>'+
+      '<div class="mid"><span class="nm">'+f.name+'</span>'+
+      '<div class="resrow">'+pips+'</div></div>'+
+      '<span class="no">#'+f.no+'</span>'+
+      '<span class="info" data-k="'+f.key+'">ⓘ</span>';
+    d.querySelector('.info').onclick=(e)=>{e.stopPropagation();openCodex(f.key,true);};
+    d.onclick=()=>toggleSel(f.key);wrap.appendChild(d);
+  });
+}
+function toggleSel(k){if(resAvail[k]<=0)return;selected.has(k)?selected.delete(k):selected.add(k);renderFuncs();
+  const names=[...selected].map(k=>FN(k).name);
+  document.getElementById('selInfo').innerHTML=names.length?'투입 예정: <b>'+names.join(', ')+'</b>':'선택된 기능 없음';}
+function updateKPIs(){
+  document.getElementById('kCas').textContent=Math.round(state.cas);
+  document.getElementById('kFlood').textContent=Math.round(state.flood);
+  document.getElementById('kRef').textContent=Math.round(state.ref);
+  document.getElementById('kDmg').textContent=Math.round(state.dmg);
+  document.getElementById('kScore').textContent=Math.round(state.score);
+  document.getElementById('bCas').style.width=Math.min(100,state.cas/CAP.cas*100)+'%';
+  document.getElementById('bFlood').style.width=Math.min(100,state.flood/CAP.flood*100)+'%';
+  document.getElementById('bRef').style.width=Math.min(100,state.ref/CAP.ref*100)+'%';
+  document.getElementById('bDmg').style.width=Math.min(100,state.dmg/CAP.dmg*100)+'%';
+  const sb=document.getElementById('bScore');sb.style.width=Math.max(0,state.score)+'%';
+  sb.style.background=state.score>66?'var(--green)':state.score>33?'var(--amber)':'var(--red)';
+}
+function log(m,t){const b=document.getElementById('logBox');const d=document.createElement('div');d.className='logitem '+(t||'');d.innerHTML=m;b.prepend(d);}
+function resolveTurn(){
+  const sc=SCENARIO[turn],need=sc.need;let hits=0,wrong=0;const chosen=[...selected];
+  selected.forEach(k=>{if(resAvail[k]>0){resAvail[k]--;need.includes(k)?hits++:wrong++;}});
+  const missed=need.length-hits;
+  // base multiplier from this turn's matching
+  let mult=1-(hits/need.length)*0.7;mult+=wrong*0.06;
+  // CAUSAL CARRYOVER: previous unmet needs amplify this turn's damage
+  mult*=(1+unmetPrev*0.15);
+  mult=Math.max(0.15,mult);
+  const aF=sc.dmg.flood*mult,aR=sc.dmg.ref*mult,aC=sc.dmg.cas*mult,aM=sc.dmg.money*mult;
+  state.flood=Math.max(0,state.flood+aF);state.ref+=aR;state.cas+=aC;state.dmg+=aM;
+  let delta=hits*6-missed*5-wrong*3;
+  state.score=Math.max(0,Math.min(100,state.score+delta));
+  const eff=Math.round((hits/need.length)*100);
+  document.getElementById('effLabel').textContent=eff+'%';
+  // record for debrief
+  record.push({phase:sc.phase,need:[...need],chosen,hits,missed,wrong,eff,exp:sc.exp});
+  // log
+  if(hits===need.length&&wrong===0)
+    log('<b>['+sc.phase+']</b> 핵심 기능 정확 투입 — 피해 최소화.<span class="sc">+'+(hits*6)+'점 · 침수+'+Math.round(aF)+'ha</span>','good');
+  else if(hits>0)
+    log('<b>['+sc.phase+']</b> 부분 대응 — 누락'+(wrong?'·오투입':'')+'으로 피해 확대.<span class="sc">Δ'+(delta>=0?'+':'')+delta+'점 · 침수+'+Math.round(aF)+'ha</span>','warn');
+  else
+    log('<b>['+sc.phase+']</b> 핵심 기능 미투입 — 피해 급증.<span class="sc">'+delta+'점 · 침수+'+Math.round(aF)+'ha</span>','bad');
+  // set carryover for NEXT turn
+  unmetPrev=missed;
+  turn++;
+  if(turn>=TOTAL){updateKPIs();renderFloodMap();endGame();}
+  else{updateKPIs();renderFloodMap();nextTurn();}
+}
+function skipTurn(){selected.clear();resolveTurn();}
+function endGame(){
+  const harm=state.cas/CAP.cas*0.32+state.flood/CAP.flood*0.22+state.ref/CAP.ref*0.22+state.dmg/CAP.dmg*0.24;
+  const harmScore=Math.max(0,100-harm*100);
+  const final=Math.round(harmScore*0.55+state.score*0.45);
+  let g,col,msg;
+  if(final>=85){g='S';col='var(--teal)';msg='완벽에 가까운 통합 대응. 협업기능 운용의 모범 사례입니다.';}
+  else if(final>=72){g='A';col='var(--green)';msg='우수한 대응. 핵심 기능을 적시 투입해 피해를 효과적으로 억제했습니다.';}
+  else if(final>=58){g='B';col='var(--blue)';msg='무난한 대응. 일부 국면에서 기능 투입이 지연되었습니다.';}
+  else if(final>=42){g='C';col='var(--amber)';msg='피해가 상당했습니다. 상황별 핵심 협업기능 식별 훈련이 필요합니다.';}
+  else{g='D';col='var(--red)';msg='대응 실패. 자원배분과 기능 매칭을 처음부터 재점검해야 합니다.';}
+  document.getElementById('result').classList.remove('hidden');
+  const gl=document.getElementById('gradeLetter');gl.textContent=g;gl.style.color=col;
+  document.getElementById('resultLines').innerHTML=
+    L('최종 점수',final+' / 100')+L('협업적정성',Math.round(state.score)+' / 100')+
+    L('인명피해 위험',Math.round(state.cas))+L('누적 침수면적',Math.round(state.flood)+' ha')+
+    L('이재민',Math.round(state.ref)+' 명')+L('피해액',Math.round(state.dmg)+' 억원');
+  document.getElementById('resultMsg').textContent=msg;
+  // debrief: always show answers + explanations (key teaching moment)
+  let html='<h3>📖 국면별 정답 · 해설</h3>';
+  record.forEach((r,i)=>{
+    let cls='g',badge='정확 대응';
+    if(r.hits===0){cls='b';badge='핵심 누락';}
+    else if(r.hits<r.need.length||r.wrong>0){cls='w';badge='부분 대응';}
+    const ansNames=r.need.map(k=>FN(k).no+'. '+FN(k).name).join(' · ');
+    const ansAgency=r.need.map(k=>{const f=FN(k);return f.name+'(주관: '+f.main.replace(/ \(.*\)/,'')+')';}).join(', ');
+    const chosenNames=r.chosen.length?r.chosen.map(k=>FN(k).name).join(', '):'(투입 없음)';
+    html+='<div class="drow"><div class="dh"><span class="dph">T'+(i+1)+'. '+r.phase+'</span>'+
+      '<span class="dbadge '+cls+'">'+badge+' · '+r.eff+'%</span></div>'+
+      '<div class="dans">정답 기능 ▸ '+ansNames+'</div>'+
+      '<div style="font-size:11.5px;color:var(--dim);font-family:\'IBM Plex Mono\',monospace;margin-bottom:4px">주관기관 ▸ '+ansAgency+'</div>'+
+      '<div style="font-size:11.5px;color:var(--dim);font-family:\'IBM Plex Mono\',monospace;margin-bottom:6px">내 선택 ▸ '+chosenNames+'</div>'+
+      '<div class="dexp">'+r.exp+'</div></div>';
+  });
+  document.getElementById('debriefBox').innerHTML=html;
+}
+function L(a,b){return '<div class="scoreline"><span>'+a+'</span><span>'+b+'</span></div>';}
+</script>
+</body>
+</html>
